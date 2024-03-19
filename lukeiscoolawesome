@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hangman Game</title>
+<style>
+    /* Styles for Hangman Game */
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+    }
+    .hangman {
+        font-size: 2em;
+        margin-bottom: 20px;
+    }
+    .word {
+        font-size: 1.5em;
+        margin-bottom: 20px;
+    }
+    .letters {
+        margin-top: 20px;
+    }
+    .letters button {
+        font-size: 1.2em;
+        margin: 5px;
+        padding: 10px 20px;
+    }
+    .status {
+        font-size: 1.2em;
+        margin-top: 20px;
+    }
+</style>
+</head>
+<body>
+<h1>Hangman Game</h1>
+<div class="hangman" id="hangman">
+    <!-- Hangman Drawing -->
+    <svg height="250" width="200">
+        <!-- Gallows -->
+        <line x1="20" y1="20" x2="180" y2="20" style="stroke:rgb(0,0,0);stroke-width:2" />
+        <line x1="60" y1="20" x2="60" y2="50" style="stroke:rgb(0,0,0);stroke-width:2" />
+        <line x1="40" y1="20" x2="60" y2="20" style="stroke:rgb(0,0,0);stroke-width:2" />
+        <line x1="40" y1="200" x2="40" y2="20" style="stroke:rgb(0,0,0);stroke-width:2" />
+        <!-- Head -->
+        <circle cx="40" cy="65" r="15" stroke="black" stroke-width="2" fill="white" />
+        <!-- Body -->
+        <line x1="40" y1="80" x2="40" y2="140" style="stroke:rgb(0,0,0);stroke-width:2" />
+        <!-- Arms -->
+        <line x1="40" y1="90" x2="10" y2="110" style="stroke:rgb(0,0,0);stroke-width:2" />
+        <line x1="40" y1="90" x2="70" y2="110" style="stroke:rgb(0,0,0);stroke-width:2" />
+        <!-- Legs -->
+        <line x1="40" y1="140" x2="20" y2="170" style="stroke:rgb(0,0,0);stroke-width:2" />
+        <line x1="40" y1="140" x2="60" y2="170" style="stroke:rgb(0,0,0);stroke-width:2" />
+    </svg>
+</div>
+<div class="word" id="word"></div>
+<div class="letters" id="letters"></div>
+<div class="status" id="status"></div>
+
+<script>
+    // List of words
+    const words = [
+        "javascript",
+        "hangman",
+        "developer",
+        "programming",
+        "computer",
+        "internet",
+        "application"
+    ];
+
+    let selectedWord;
+    let guessedLetters = [];
+    let remainingAttempts = 6;
+
+    // Select a random word
+    function selectRandomWord() {
+        return words[Math.floor(Math.random() * words.length)];
+    }
+
+    // Initialize the game
+    function initializeGame() {
+        selectedWord = selectRandomWord();
+        guessedLetters = [];
+        remainingAttempts = 6;
+        updateWordDisplay();
+        updateLettersDisplay();
+        updateStatus();
+    }
+
+    // Update word display
+    function updateWordDisplay() {
+        const wordElement = document.getElementById("word");
+        let displayWord = "";
+        for (const letter of selectedWord) {
+            if (guessedLetters.includes(letter)) {
+                displayWord += letter + " ";
+            } else {
+                displayWord += "_ ";
+            }
+        }
+        wordElement.textContent = displayWord;
+    }
+
+    // Update letters display
+    function updateLettersDisplay() {
+        const lettersElement = document.getElementById("letters");
+        lettersElement.innerHTML = "";
+        for (let i = 65; i <= 90; i++) {
+            const letter = String.fromCharCode(i);
+            const button = document.createElement("button");
+            button.textContent = letter;
+            button.addEventListener("click", () => {
+                guessLetter(letter);
+            });
+            lettersElement.appendChild(button);
+        }
+    }
+
+    // Guess a letter
+    function guessLetter(letter) {
+        if (!guessedLetters.includes(letter)) {
+            guessedLetters.push(letter);
+            if (!selectedWord.includes(letter)) {
+                remainingAttempts--;
+                updateHangman();
+            }
+            updateWordDisplay();
+            updateLettersDisplay();
+            updateStatus();
+        }
+    }
+
+    // Update hangman drawing
+    function updateHangman() {
+        const hangmanParts = ["head", "body", "arms", "legs"];
+        const hangmanElement = document.getElementById("hangman");
+        const partsToDraw = hangmanParts.slice(-remainingAttempts);
+        for (const part of hangmanParts) {
+            const element = document.querySelector(`#${part}`);
+            if (partsToDraw.includes(part)) {
+                element.style.display = "initial";
+            } else {
+                element.style.display = "none";
+            }
+        }
+    }
+
+    // Update game status
+    function updateStatus() {
+        const statusElement = document.getElementById("status");
+        if (remainingAttempts === 0) {
+            statusElement.textContent = "You lost! The word was: " + selectedWord;
+        } else if (!document.getElementById("word").textContent.includes("_")) {
+            statusElement.textContent = "You won!";
+        } else {
+            statusElement.textContent = "Remaining attempts: " + remainingAttempts;
+        }
+    }
+
+    // Initialize the game when the page loads
+    initializeGame();
+</script>
+</body>
+</html>
